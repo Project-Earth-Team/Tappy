@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 /*
  * Tappy
@@ -11,86 +12,57 @@ namespace Tappy
 {
     class Program
     {
-
-        
         static void Main(string[] args)
         {
-            /*
-             * Welcome to ugly hardcoded land
-             * Todo: make this not ugly hardcoded land
-             * Todo: Add the functions and files to generate additional specific pools for the other tappable types
-             */
-            
-            Console.WriteLine("===Tappable Loot Table Generation System==");
-            Console.WriteLine("[Info] Reading all data files for generation");
-            string[] commonIds = File.ReadAllLines(@"./common.txt");
-            string[] uncommonIds = File.ReadAllLines(@"./uncommon.txt");
-            string[] rareIds = File.ReadAllLines(@"./rare.txt");
-            string[] epicIds = File.ReadAllLines(@"./epic.txt");
-            string[] legendaryIds = File.ReadAllLines(@"./legendary.txt");
-            Console.WriteLine("== Stage 1: Base common rarity itemsets [genoa:chest_tappable_map] ==");
-            Console.WriteLine("[Info] Generating "+Utils.numBaseCommonItemsets+" itemsets.");
-            Utils.ItemLootTable commonChestItemLootTable = new Utils.ItemLootTable();
-            commonChestItemLootTable.itemsets ??= new List<Utils.Itemset>();
-            commonChestItemLootTable.TableRarity = "Common";
-            commonChestItemLootTable.tappableID = "genoa:chest_tappable_map";
-            for (int i = 0; i<Utils.numBaseCommonItemsets; i++)
+            Random random = new Random();
+            Console.WriteLine("Tappy | Tappable Loot Table Generation System");
+
+            /* Load Data Files */
+            Console.WriteLine("Loading data files");
+            Directory.CreateDirectory("./inputdata");
+            string[] files = Directory.GetFiles("./inputdata", "*.json");
+            Directory.CreateDirectory("./outputdata");
+            foreach (string filePath in files)
             {
-                //Indices 
-                int maxIndex = commonIds.Length - 1;
-                Random random = new Random();
-                int itemA = random.Next(maxIndex);
-                int itemB = itemA;
-                while (itemA == itemB)
+                Utils.TableData tableData = JsonConvert.DeserializeObject<Utils.TableData>(File.ReadAllText(filePath));
+                Console.WriteLine("Processing Tappable Data for tappable type "+tableData.tappableID);
+                Utils.TappableLootTable resultLootTable = new Utils.TappableLootTable();
+                resultLootTable.possibleDropSets ??= new List<List<string>>();
+                resultLootTable.tappableID = tableData.tappableID;
+                //we generate 100 dropTables (no, not Bobby Tables drop tables)
+                for (int i = 0; i < 100; i++)
                 {
-                    itemB = random.Next(maxIndex);
+                    List<string> rewards = new List<string>();
+                    //how many do we want
+                    int numRewards = random.Next(tableData.minItemsPerTap, tableData.maxItemsPerTap);
+                    Console.WriteLine("Set "+i+" Will have "+numRewards+" rewards.");
+                    for (int i2 = 0; i2 < numRewards; i2++)
+                    {
+                        while (true)
+                        {
+                            //we get a random item from the table
+                            int randIndex = random.Next(0, tableData.percentages.Count);
+                            var targetItem = tableData.percentages.ElementAt(randIndex);
+                            //try and add it based on percentage
+                            int roll = random.Next(0, 100);
+                            Console.WriteLine("Got role of "+roll+" for item with percentage "+targetItem.Value+" Target item: "+targetItem.Key);
+                            if (targetItem.Value <= roll)
+                            {
+                                Console.WriteLine("Added item to rewards");
+                                rewards.Add(targetItem.Key);
+                                break;
+                            }
+                        }
+                    }
+                    //Add our rewards to the main loot table
+                    resultLootTable.possibleDropSets.Add(rewards);
                 }
-                int itemC = itemA;
-                while (itemC == itemA || itemC == itemB)
-                {
-                    itemC = random.Next(maxIndex);
-                }
-                //Create itemset
-                Console.WriteLine($"[Info] Item indices: {itemA},{itemB},{itemC}");
-                Utils.Itemset itemset = new Utils.Itemset();
-                itemset.items ??= new Dictionary<string, int>();
-                itemset.items.Add(commonIds[itemA], random.Next(1,3));
-                itemset.items.Add(commonIds[itemB], random.Next(1,3));
-                itemset.items.Add(commonIds[itemC], random.Next(1,3));
-                commonChestItemLootTable.itemsets.Add(itemset);
-                
+                //Now we save it
+                string table = JsonConvert.SerializeObject(resultLootTable);
+               // Console.WriteLine(table);
+                File.WriteAllText("./outputdata/"+resultLootTable.tappableID.Split(":")[1]+".json", table);
             }
-            
-            //TODO: use the config file i mentioned in Utils.cs to make these not hardcoded paths that only work for me.
-            
-            //Serialize itemset and write to disk.
-            string commonChestItemPoolSerialized = JsonConvert.SerializeObject(commonChestItemLootTable);
-            var cfile = new StreamWriter(@"C:\Workspace\Programming\c\minecraft_earth\tools\common_chest.json", true);
-            cfile.WriteLine(commonChestItemPoolSerialized+"\n");
-            cfile.Close();
-            //We now have our base for the others!
-            Console.WriteLine("== Stage 2: All chest rarities [genoa:chest_tappable_map] ==");
-            Console.WriteLine("[Info] Generating uncommon chest data...");
-            Utils.ItemLootTable uncommonChestItemLootTable =
-                Utils.genChestItemLootTable(Utils.numUncommonSets, uncommonIds, commonChestItemLootTable, "Uncommon");
-            string uncommonChestItemLootTableSer = JsonConvert.SerializeObject(uncommonChestItemLootTable);
-            var ufile = new StreamWriter(@"C:\Workspace\Programming\c\minecraft_earth\tools\uncommon_chest.json", true);
-            ufile.WriteLine(uncommonChestItemLootTableSer+"\n");
-            ufile.Close();
-            Console.WriteLine("[Info] Generating rare chest data...");
-            Utils.ItemLootTable rareChestItemLootTable =
-                Utils.genChestItemLootTable(Utils.numRareSets, rareIds, commonChestItemLootTable, "Rare");
-            string rareChestItemLootTableSer = JsonConvert.SerializeObject(uncommonChestItemLootTable);
-            var rfile = new StreamWriter(@"C:\Workspace\Programming\c\minecraft_earth\tools\tables\rare_chest.json", true);
-            rfile.WriteLine(uncommonChestItemLootTableSer+"\n");
-            rfile.Close();
-            Console.WriteLine("[Info] Generating epic chest data...");
-            Utils.ItemLootTable epicChestItemLootTable =
-                Utils.genChestItemLootTable(Utils.numEpicSets, epicIds, commonChestItemLootTable, "Epic");
-            string epicChestItemLootTableSer = JsonConvert.SerializeObject(uncommonChestItemLootTable);
-            var efile = new StreamWriter(@"C:\Workspace\Programming\c\minecraft_earth\tools\tables\epic_chest.json", true);
-            efile.WriteLine(uncommonChestItemLootTableSer+"\n");
-            efile.Close();
+            Console.WriteLine("Done! ");
         }
     }
 }
