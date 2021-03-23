@@ -1,19 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-/*
- * Tappy
- * A tool to generate tappable loot tables
- */
-
-namespace Tappy
+namespace Tappy_UI.ViewModels
 {
-    class Program
+    public class MainWindowViewModel : ViewModelBase
     {
-        static void Main(string[] args)
-        {
+        public string Greeting => "Welcome to Avalonia!";
+
+        public void ButtonClicked() {
             Random random = new Random();
             Console.WriteLine("Tappy | Tappable Loot Table Generation System");
 
@@ -25,7 +22,7 @@ namespace Tappy
             foreach (string filePath in files)
             {
                 Utils.TableData tableData = JsonConvert.DeserializeObject<Utils.TableData>(File.ReadAllText(filePath));
-                Console.WriteLine("Processing Tappable Data for tappable type "+tableData.tappableID);
+                Console.WriteLine("Processing Tappable Data for tappable type " + tableData.tappableID);
                 Utils.TappableLootTable resultLootTable = new Utils.TappableLootTable();
                 resultLootTable.possibleDropSets ??= new List<List<string>>();
                 resultLootTable.tappableID = tableData.tappableID;
@@ -35,7 +32,7 @@ namespace Tappy
                     List<string> rewards = new List<string>();
                     //how many do we want
                     int numRewards = random.Next(tableData.minItemsPerTap, tableData.maxItemsPerTap);
-                    Console.WriteLine("Set "+i+" Will have "+numRewards+" rewards.");
+                    Console.WriteLine("Set " + i + " Will have " + numRewards + " rewards.");
                     for (int i2 = 0; i2 < numRewards; i2++)
                     {
                         while (true)
@@ -45,8 +42,8 @@ namespace Tappy
                             var targetItem = tableData.percentages.ElementAt(randIndex);
                             //try and add it based on percentage
                             int roll = random.Next(0, 100);
-                            Console.WriteLine("Got role of "+roll+" for item with percentage "+targetItem.Value+" Target item: "+targetItem.Key);
-                            if (targetItem.Value <= roll || targetItem.Value == 100) 
+                            Console.WriteLine("Got role of " + roll + " for item with percentage " + targetItem.Value + " Target item: " + targetItem.Key);
+                            if (targetItem.Value <= roll || targetItem.Value == 100)
                             {
                                 Console.WriteLine("Added item to rewards");
                                 rewards.Add(targetItem.Key);
@@ -59,8 +56,8 @@ namespace Tappy
                 }
                 //Now we save it
                 string table = JsonConvert.SerializeObject(resultLootTable);
-               // Console.WriteLine(table);
-                File.WriteAllText("./outputdata/"+resultLootTable.tappableID.Split(":")[1]+".json", table);
+                // Console.WriteLine(table);
+                File.WriteAllText("./outputdata/" + resultLootTable.tappableID.Split(":")[1] + ".json", table);
             }
             Console.WriteLine("Done! ");
         }

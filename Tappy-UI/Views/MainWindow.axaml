@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Tappy_UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="450"
+        x:Class="Tappy_UI.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Tappy UI | v1.1">
+
+  <Window.Styles>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="24"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+  </Window.Styles>
+
+  <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+  <StackPanel VerticalAlignment="Center">
+    <TextBlock HorizontalAlignment="Center" Classes="h1">Tappy v1.1</TextBlock>
+ 
+    <Button Width="180" HorizontalAlignment="Center" Margin="20" VerticalAlignment="Center" Command="{Binding ButtonClicked}">Generate Sample Drops</Button>
+
+    <TextBlock HorizontalAlignment="Center" Classes="h2">How to use:</TextBlock>
+    <ListBox HorizontalAlignment="Center">
+      <TextBlock> ~ In the "inputdata" folder next to this executable, 
+      you can edit json files to modify the input droptables for each tappable</TextBlock>
+      <TextBlock>
+        ~ When your ready to get some results, hit the
+        "Generate Sample Drops" button above, then check the 
+        "outputdata" folder next to this executable
+      </TextBlock>
+    </ListBox>
+  </StackPanel>
+
+</Window>
