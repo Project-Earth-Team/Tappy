@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="450"
         x:Class="Tappy_UI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Tappy UI | v1.1">
+        Title="Tappy UI | v1.2">
 
   <Window.Styles>
     <Style Selector="TextBlock.h1">
@@ -24,10 +24,12 @@
     </Design.DataContext>
 
   <StackPanel VerticalAlignment="Center">
-    <TextBlock HorizontalAlignment="Center" Classes="h1">Tappy v1.1</TextBlock>
- 
-    <Button Width="180" HorizontalAlignment="Center" Margin="20" VerticalAlignment="Center" Command="{Binding ButtonClicked}">Generate Sample Drops</Button>
+    <TextBlock HorizontalAlignment="Center" Classes="h1">Tappy v1.2</TextBlock>
 
+   
+    <Button Width="180" HorizontalAlignment="Center" Margin="20" VerticalAlignment="Center" Command="{Binding ButtonClicked}">Generate Sample Drops</Button>
+    <TextBox Watermark="Enter amount of runs. Must be a number."  Width="180" Text="{Binding runNumString, Mode=TwoWay}"></TextBox>
+    
     <TextBlock HorizontalAlignment="Center" Classes="h2">How to use:</TextBlock>
     <ListBox HorizontalAlignment="Center">
       <TextBlock> ~ In the "inputdata" folder next to this executable, 

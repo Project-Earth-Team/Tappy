@@ -8,7 +8,20 @@ namespace Tappy_UI.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Welcome to Avalonia!";
+
+        private string _runNumStr = "100";
+        public string runNumString
+        {
+            get => _runNumStr;
+            set
+            {
+                if (value != null && value.Length > 0 && value[0] == '#' && value.Length <= 5)
+                {
+                    _runNumStr = value;
+                }
+
+            }
+        }
 
         public void ButtonClicked() {
             Random random = new Random();
@@ -27,30 +40,32 @@ namespace Tappy_UI.ViewModels
                 resultLootTable.possibleDropSets ??= new List<List<string>>();
                 resultLootTable.tappableID = tableData.tappableID;
                 //we generate 100 dropTables (no, not Bobby Tables drop tables)
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < Int64.Parse(_runNumStr); i++)
                 {
                     List<string> rewards = new List<string>();
                     //how many do we want
                     int numRewards = random.Next(tableData.minItemsPerTap, tableData.maxItemsPerTap);
-                    Console.WriteLine("Set " + i + " Will have " + numRewards + " rewards.");
-                    for (int i2 = 0; i2 < numRewards; i2++)
+                    Console.WriteLine("[Info] Set " + i + " Will have " + numRewards + " rewards.");
+                    int sum = 0;
+                    foreach (var itemPercentage in tableData.percentages)
                     {
-                        while (true)
-                        {
-                            //we get a random item from the table
-                            int randIndex = random.Next(0, tableData.percentages.Count);
-                            var targetItem = tableData.percentages.ElementAt(randIndex);
-                            //try and add it based on percentage
-                            int roll = random.Next(0, 100);
-                            Console.WriteLine("Got role of " + roll + " for item with percentage " + targetItem.Value + " Target item: " + targetItem.Key);
-                            if (targetItem.Value <= roll || targetItem.Value == 100)
+                        sum += itemPercentage.Value;
+                    }
+                    for (int i2 = 0; i2 <= numRewards; i2++)
+                    {
+                        int randomRoll = random.Next(0, sum);
+                            foreach (var item in tableData.percentages)
                             {
-                                Console.WriteLine("Added item to rewards");
-                                rewards.Add(targetItem.Key);
-                                break;
+                                if (randomRoll < item.Value)
+                                {
+                                    rewards.Add(item.Key);
+                                    break;
+                                }
+
+                                randomRoll -= item.Value;
                             }
                         }
-                    }
+                    Console.WriteLine("[Info] End set " + i+" generation");
                     //Add our rewards to the main loot table
                     resultLootTable.possibleDropSets.Add(rewards);
                 }

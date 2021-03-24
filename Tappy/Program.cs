@@ -40,18 +40,20 @@ namespace Tappy
                     {
                         while (true)
                         {
-                            //we get a random item from the table
-                            int randIndex = random.Next(0, tableData.percentages.Count);
-                            var targetItem = tableData.percentages.ElementAt(randIndex);
-                            //try and add it based on percentage
-                            int roll = random.Next(0, 100);
-                            Console.WriteLine("Got role of "+roll+" for item with percentage "+targetItem.Value+" Target item: "+targetItem.Key);
-                            if (targetItem.Value <= roll || targetItem.Value == 100) 
-                            {
-                                Console.WriteLine("Added item to rewards");
-                                rewards.Add(targetItem.Key);
-                                break;
-                            }
+                            // //we get a random item from the table
+                            // int randIndex = random.Next(0, tableData.percentages.Count);
+                            // var targetItem = tableData.percentages.ElementAt(randIndex);
+                            // //try and add it based on percentage
+                            // int roll = random.Next(0, 100);
+                            // Console.WriteLine("Got role of "+roll+" for item with percentage "+targetItem.Value+" Target item: "+targetItem.Key);
+                            // if (targetItem.Value <= roll || targetItem.Value == 100) 
+                            // {
+                            //     Console.WriteLine("Added item to rewards");
+                            //     rewards.Add(targetItem.Key);
+                            //     break;
+                            // }
+
+                            
                         }
                     }
                     //Add our rewards to the main loot table
